@@ -15,7 +15,9 @@ app.use(express.json());
 // If deployed, use the deployed database. Otherwise use the local mongoHeadlines database
 var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
 
-mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false });
+// mongoose.set('useFindAndModify', false);
+
 const db = mongoose.connection;
 //lets us know if we are connected to mongoose 
 db.on("error", console.error.bind(console, "connection error:"));
@@ -26,6 +28,10 @@ db.once('open', () => {
 // Set Handlebars.
 app.engine("handlebars", exphbs({ defaultLayout: "main" }));
 app.set("view engine", "handlebars");
+
+const router = require('./controllers/controller.js');
+app.use(router);
+
 
 app.listen(PORT, function () {
   console.log("Server listening on: http://localhost:" + PORT);

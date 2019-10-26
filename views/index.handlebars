@@ -6,13 +6,59 @@
     </div>
 </div>
 <div class="row">
-    <div class="col s2"></div>
-    <div class="col s8 left-align">
-        {{#each article}}
-        <div class="card-panel">
-            <h4>{{this.title}}</h4>
-            <a href="/readArticle/{{this.id}}" class="waves-effect waves-light btn" id="btnSignUp">Read Article</a>
+    {{!-- <div class="col s2"></div> --}}
+    {{#each article}}
+    <div class="col s12 m4 l6">
+        <div class="card">
+            <div class="card-image">
+                <img src="{{this.img}}" alt="coolness">
+            </div>
+            <span class="card-title">{{this.title}}</span>
+            <div class="card-content">
+                <p>{{this.summary}}</p>
+            </div>
+            <div class="card-action">
+                <a href="{{this.link}}" target="_blank" class="waves-effect waves-light btn" id="btnSignUp">Read
+                    Article</a>
+                {{!-- <div class="comment-area"></div> --}}
+                <form action="/comment/{{this.id}}" method="POST">
+                    <div class="row">
+                        <div class="input-field">
+                            <i class="material-icons prefix">perm_identity</i>
+                            <input type="text" id="icon_prefix" placeholder="Name" name="name" class="validate active">
+                        </div>
+                        <div class="input-field">
+                            <i class="material-icons prefix">comment</i>
+                            <input type="text" id="icon_telephone" placeholder="Comment" name="comment"
+                                class="validate active">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field">
+                            <center><input type="submit" class="btn add-comment-button topnav" value="Submit"></center>
+                        </div>
+                    </div>
+                </form>
+                <div class="row">
+                    {{!-- <div class="col s2"></div> --}}
+                    <div class="col s8">
+                        <h5>Comments:</h5>
+                        {{#if article.comment}}
+                        {{#each article.comment}}
+                        <div class="card">
+                            <p id="nameComment">{{name}}</p>
+                            <p>{{body}}</p>
+                        </div>
+                        {{/each}}
+                        {{else}}
+                        <p>No Comments Yet</p>
+                        {{/if}}
+                    </div>
+                </div>
+                {{!-- <a href="/comment/{{this.id}}" target="#" class="waves-effect waves-light btn" id="addComment">Add comment</a> --}}
+            </div>
         </div>
-        {{/each}}
     </div>
+    {{/each}}
+</div>
 </div>
