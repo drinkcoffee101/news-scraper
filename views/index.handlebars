@@ -1,15 +1,15 @@
 <div>
-    <h1 class="card z-depth-3 center-align">Read the Latest from "Some Site"</h1>
+    <h1 class="card z-depth-3 center-align gree">Read the Latest from Attack Magazine</h1>
     <div class="row">
         <div class="col s3"></div>
-        <h5 class="card z-depth-3 center-align col s6">Click 'Scrape' to get the latest articles</h5>
+        <h5 class="card z-depth-3 center-align col s6 yello">Click 'Scrape' to get the latest articles</h5>
     </div>
 </div>
 <div class="row">
-    {{!-- <div class="col s2"></div> --}}
+    {{!-- {{log article}} --}}
     {{#each article}}
     <div class="col s12 m4 l6">
-        <div class="card">
+        <div class="card purp">
             <div class="card-image">
                 <img src="{{this.img}}" alt="coolness">
             </div>
@@ -17,10 +17,9 @@
             <div class="card-content">
                 <p>{{this.summary}}</p>
             </div>
-            <div class="card-action">
+            <div class="card-action yello">
                 <a href="{{this.link}}" target="_blank" class="waves-effect waves-light btn" id="btnSignUp">Read
                     Article</a>
-                {{!-- <div class="comment-area"></div> --}}
                 <form action="/comment/{{this.id}}" method="POST">
                     <div class="row">
                         <div class="input-field">
@@ -40,12 +39,11 @@
                     </div>
                 </form>
                 <div class="row">
-                    {{!-- <div class="col s2"></div> --}}
-                    <div class="col s8">
+                    <div class="col s8 gree">
                         <h5>Comments:</h5>
-                        {{#if article.comment}}
-                        {{#each article.comment}}
-                        <div class="card">
+                        {{#if this.comment}}
+                        {{#each this.comment}}
+                        <div class="card yellow">
                             <p id="nameComment">{{name}}</p>
                             <p>{{body}}</p>
                         </div>
@@ -55,7 +53,6 @@
                         {{/if}}
                     </div>
                 </div>
-                {{!-- <a href="/comment/{{this.id}}" target="#" class="waves-effect waves-light btn" id="addComment">Add comment</a> --}}
             </div>
         </div>
     </div>

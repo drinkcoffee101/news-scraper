@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const path = require('path');
-const request = require('request');
 const cheerio = require('cheerio');
 const axios = require('axios');
 
@@ -10,15 +9,12 @@ const Article = require('../models/article.js');
 
 router.get('/', (req, res) => {
     res.redirect('/articles')
-    // res.send("Hello world");
 })
-
-router.get('/scrape', (requ, resu) => {
-    axios.get('https://www.attackmagazine.com/news/').then((res) => {
-        const html = res.data
+//get route to scrape website for information and store in db
+router.get('/scrape', (req, res) => {
+    axios.get('https://www.attackmagazine.com/news/').then((result) => {
+        const html = result.data
         const $ = cheerio.load(html)
-        // An empty array to save the data that we'll scrape
-        var titlesArray = [];
         //search for each element containing article 
         $('.article--wide').each((i, element) => {
 
@@ -27,87 +23,55 @@ router.get('/scrape', (requ, resu) => {
                 link: $(element).find('a').attr("href"),
                 summary: $(element).find('p').text().slice(4),
                 img: $(element).find('.inner').attr('style').slice(22, -2)
-
             }
-            //check for duplicate titles 
-            //if the current searched element is not empty 
-            // if (result.title !== '' && result.link !== '') {
-            //check if the searched element already exsists 
-            // if (titlesArray.indexOf(result.title) == -1) {
-            //     //if not, add it to the list of titles
-            //     titlesArray.push(result.title)
             //this checks if the document exsists in the collection
             Article.countDocuments({ title: result.title }, (err, test) => {
                 if (test === 0) {
-                    //instanciate a new document using the Artcile model 
-                    //comes with a .save() method to add the new document to the db
-                    var entry = new Article(result)
-
-                    entry.save((err, doc) => {
-                        if (err) {
-                            console.error(err)
-                        }
-                        else {
-                            console.log(doc)
-                        }
-                    })
+                    Article.create(result).then((res) => { console.log(res) }).catch((err) => { console.error(err) })
                 }
             })
-            // }
-            // else {
-            //     console.log('Article already exsists')
-            // }
-            // }
-            // else {
-            //     console.log('Not saved to DB, missing data')
-            // }
         })
         res.redirect('/')
     }).catch((err) => {
-
+        console.error(err)
     })
 })
 
 //grab every artivle and populate the dom 
 router.get('/articles', (req, res) => {
     Article.find().sort({ _id: -1 })
-        //mongoose queries are not promises 
-        //if you need a real Promise use exec 
-        .exec((err, doc) => {
-            if (err) {
-                console.error(err)
-            }
-            else {
-                let documents = { article: doc }
-                res.render('index', documents)
-            }
+        .populate('comment')
+        .then((doc) => {
+            // console.log(doc[0].comment)
+            let documents = { article: doc }
+            res.render('index', documents)
         })
+        .catch((err) => { console.error(err) })
 })
 
 //finds all articles and returns as JSON 
 router.get('/articles-json', (req, res) => {
-    Article.find({}, (err, doc) => {
-        if (err) {
-            console.error(err)
-        } else {
+    Article.find({})
+        .then((doc) => {
             res.json(doc)
-        }
-    })
+        }).catch((err) => {
+            console.error(err)
+        })
 })
 
 //route to remove all articles
 router.get('/clear', (req, res) => {
-    Article.remove({}, (err, doc) => {
-        if (err) {
-            console.error(err)
-        }
-        else {
+    Article.deleteMany({})
+        .then(() => {
             console.log('removed all articles ')
-        }
-    })
-    res.redirect('/artcles-json')
+            res.redirect('/')
+        })
+        .catch((err) => {
+            console.error(err)
+        })
 })
 
+//post route to associate comment with article 
 router.post('/comment/:id', (req, res) => {
     let articleId = req.params.id;
 
@@ -116,40 +80,16 @@ router.post('/comment/:id', (req, res) => {
         body: req.body.comment
     }
 
-    console.log(comment)
-
-    let newComment = new Comment(comment)
-
-    newComment.save((err, doc) => {
-        if (err) {
+    Comment.create(comment)
+        .then((dbComment) => {
+            return Article.findOneAndUpdate({ _id: articleId }, { $push: { comment: dbComment._id } }, { new: true })
+        })
+        .then((dbArticle) => {
+            console.log(dbArticle)
+        })
+        .catch((err) => {
             console.error(err)
-        }
-        else {
-            console.log("comment id:" + doc._id);
-            console.log("articleId:" + articleId)
-
-            // Article.findByIdAndUpdate(
-            //     { _id: articleId },
-            //     { $push: { comment: doc._id } },
-            //     { new: true }
-            // ).exec((err, doc) => {
-            //     if (err) {
-            //         console.error(err)
-            //     }
-            //     else {
-            //         // res.redirect('/')
-            //     }
-            // })
-            Article.findOneAndUpdate({ _id: articleId }, { $push: { comment: doc._id } }, { new: true }).then((dbArticle) => {
-
-            }).catch((error) => {
-                console.error(error)
-            })
-        }
-    })
-
+        })
 })
-
-
 // Export routes for server.js to use.
 module.exports = router;
