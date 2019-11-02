@@ -37,7 +37,7 @@ router.get('/scrape', (req, res) => {
                     }
                 })
             })
-            // res.redirect('/')
+            res.redirect('/')
             // res.redirect('http://localhost:8080/')
             // res.redirect('/articles')
             // res.redirect('http://localhost:8080/')
